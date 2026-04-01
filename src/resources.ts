@@ -17,7 +17,7 @@ export function createConfigResource() {
       currentLogLevel: getCurrentLogLevel()
     },
     capabilities: {
-      tools: ["searxng_web_search", "web_url_read"],
+      tools: ["searxng_web_search", "web_url_read", "synthesize"],
       logging: true,
       resources: true,
       transports: process.env.MCP_HTTP_PORT ? ["stdio", "http"] : ["stdio"]
@@ -49,7 +49,20 @@ Performs web searches using the configured SearXNG instance.
 Reads and converts web page content to Markdown format.
 
 **Parameters:**
-- \`url\` (required): The URL to fetch and convert
+- \\\`url\\\` (required): The URL to fetch and convert
+
+### 3. synthesize
+Synthesizes search results or page content into a concise Markdown summary using a lightweight LLM.
+
+**Parameters:**
+- \\\`query\\\` (required): The original search query or topic (provides context)
+- \\\`results\\\` (required): The search results or page content to synthesize
+- \\\`instructions\\\` (optional): Extra instructions for the summary (e.g., "focus on pricing")
+
+**Provider Configuration:**
+- \\\`SYNTHESIZE_PROVIDER\\\`: Choose "gemini" (default) or "mimo"
+- \\\`GEMINI_API_KEY\\\`: Required when using the gemini provider
+- \\\`MIMO_API_KEY\\\`: Required when using the mimo provider
 
 ## Configuration
 

@@ -69,6 +69,64 @@ export const WEB_SEARCH_TOOL: Tool = {
   },
 };
 
+export function isSynthesizeArgs(args: unknown): args is {
+  query: string;
+  results: string;
+  instructions?: string;
+} {
+  if (
+    typeof args !== "object" ||
+    args === null ||
+    !("query" in args) ||
+    typeof (args as { query: string }).query !== "string" ||
+    !("results" in args) ||
+    typeof (args as { results: string }).results !== "string"
+  ) {
+    return false;
+  }
+
+  if (
+    "instructions" in args &&
+    (args as { instructions: unknown }).instructions !== undefined &&
+    typeof (args as { instructions: string }).instructions !== "string"
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+export const SYNTHESIZE_TOOL: Tool = {
+  name: "synthesize",
+  description:
+    "Synthesizes search results or page content into a concise, well-structured Markdown summary using a lightweight LLM. " +
+    "Use this after web_search or web_url_read to distill information into a digestible format.",
+  annotations: {
+    readOnlyHint: true,
+  },
+  inputSchema: {
+    type: "object",
+    properties: {
+      query: {
+        type: "string",
+        description:
+          "The original search query or topic (provides context for the summary)",
+      },
+      results: {
+        type: "string",
+        description:
+          "The search results or page content to synthesize into a summary",
+      },
+      instructions: {
+        type: "string",
+        description:
+          "Optional extra instructions for the summary (e.g., 'focus on pricing', 'compare options', 'keep it under 200 words')",
+      },
+    },
+    required: ["query", "results"],
+  },
+};
+
 export const READ_URL_TOOL: Tool = {
   name: "web_url_read",
   description:

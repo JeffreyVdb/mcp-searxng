@@ -17,6 +17,7 @@ import { runTests as runErrorHandlerTests } from './unit/error-handler.test.js';
 import { runTests as runResourcesTests } from './unit/resources.test.js';
 import { runTests as runSearchTests } from './unit/search.test.js';
 import { runTests as runUrlReaderTests } from './unit/url-reader.test.js';
+import { runTests as runSynthesizeTests } from './unit/synthesize.test.js';
 import { runTests as runHttpServerTests } from './integration/http-server.test.js';
 import { runTests as runIndexTests } from './integration/index.test.js';
 
@@ -36,6 +37,7 @@ const testSuites: TestSuite[] = [
   { name: 'Resources', category: 'unit', run: runResourcesTests },
   { name: 'Search', category: 'unit', run: runSearchTests },
   { name: 'URL Reader', category: 'unit', run: runUrlReaderTests },
+  { name: 'Synthesize', category: 'unit', run: runSynthesizeTests },
   
   // Integration Tests
   { name: 'HTTP Server', category: 'integration', run: runHttpServerTests },

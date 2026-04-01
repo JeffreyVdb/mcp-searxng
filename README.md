@@ -28,6 +28,7 @@ AI Assistant (e.g. Claude)
 
 - **Web Search**: General queries, news, articles, with pagination.
 - **URL Content Reading**: Advanced content extraction with pagination, section filtering, and heading extraction.
+- **Synthesize**: AI-powered summarization of search results or page content into concise Markdown using lightweight LLMs (Gemini Flash Lite or MiMo V2 Flash).
 - **Intelligent Caching**: URL content is cached with TTL (Time-To-Live) to improve performance and reduce redundant requests.
 - **Pagination**: Control which page of results to retrieve.
 - **Time Filtering**: Filter results by time range (day, month, year).
@@ -55,6 +56,13 @@ AI Assistant (e.g. Claude)
     - `paragraphRange` (string, optional): Return specific paragraph ranges (e.g., '1-5', '3', '10-')
     - `readHeadings` (boolean, optional): Return only a list of headings instead of full content
 
+- **synthesize**
+  - Synthesize search results or page content into a concise Markdown summary using a lightweight LLM
+  - Inputs:
+    - `query` (string): The original search query or topic (provides context for the summary)
+    - `results` (string): The search results or page content to synthesize
+    - `instructions` (string, optional): Extra instructions for the summary (e.g., "focus on pricing", "compare options")
+
 ## Configuration
 
 ### Environment Variables
@@ -68,6 +76,9 @@ AI Assistant (e.g. Claude)
 - **`AUTH_USERNAME`** / **`AUTH_PASSWORD`**: HTTP Basic Auth credentials for `searxng_web_search` (password-protected SearXNG instances)
 - **`USER_AGENT`**: Global default User-Agent header used by both `searxng_web_search` and `web_url_read` (e.g., `MyBot/1.0`)
 - **`URL_READER_USER_AGENT`**: Custom User-Agent specifically for the `web_url_read` tool (overrides `USER_AGENT` for URL reading requests)
+- **`SYNTHESIZE_PROVIDER`**: LLM provider for the `synthesize` tool — `gemini` (default) or `mimo`
+- **`GEMINI_API_KEY`**: API key for Google Gemini (required when `SYNTHESIZE_PROVIDER` is `gemini` or unset)
+- **`MIMO_API_KEY`**: API key for Xiaomi MiMo (required when `SYNTHESIZE_PROVIDER` is `mimo`)
 - **`HTTP_PROXY`** / **`HTTPS_PROXY`**: Global proxy URLs for routing traffic (fallback for both interfaces)
   - Format: `http://[username:password@]proxy.host:port`
 - **`NO_PROXY`**: Comma-separated bypass list (e.g., `localhost,.internal,example.com`)
@@ -99,7 +110,8 @@ URL_READER_USER_AGENT="Mozilla/5.0 (compatible; Bot/1.0)"
       "command": "npx",
       "args": ["-y", "mcp-searxng"],
       "env": {
-        "SEARXNG_URL": "YOUR_SEARXNG_INSTANCE_URL"
+        "SEARXNG_URL": "YOUR_SEARXNG_INSTANCE_URL",
+        "GEMINI_API_KEY": "YOUR_GEMINI_API_KEY"
       }
     }
   }
@@ -125,7 +137,9 @@ URL_READER_USER_AGENT="Mozilla/5.0 (compatible; Bot/1.0)"
         "URL_READER_HTTP_PROXY": "http://reader-proxy.company.com:8080",
         "HTTP_PROXY": "http://global-proxy.company.com:8080",
         "HTTPS_PROXY": "http://global-proxy.company.com:8080",
-        "NO_PROXY": "localhost,127.0.0.1,.local,.internal"
+        "NO_PROXY": "localhost,127.0.0.1,.local,.internal",
+        "SYNTHESIZE_PROVIDER": "gemini",
+        "GEMINI_API_KEY": "YOUR_GEMINI_API_KEY"
       }
     }
   }
@@ -148,7 +162,8 @@ npm install -g mcp-searxng
     "searxng": {
       "command": "mcp-searxng",
       "env": {
-        "SEARXNG_URL": "YOUR_SEARXNG_INSTANCE_URL"
+        "SEARXNG_URL": "YOUR_SEARXNG_INSTANCE_URL",
+        "GEMINI_API_KEY": "YOUR_GEMINI_API_KEY"
       }
     }
   }
@@ -173,7 +188,9 @@ npm install -g mcp-searxng
         "URL_READER_HTTP_PROXY": "http://reader-proxy.company.com:8080",
         "HTTP_PROXY": "http://global-proxy.company.com:8080",
         "HTTPS_PROXY": "http://global-proxy.company.com:8080",
-        "NO_PROXY": "localhost,127.0.0.1,.local,.internal"
+        "NO_PROXY": "localhost,127.0.0.1,.local,.internal",
+        "SYNTHESIZE_PROVIDER": "gemini",
+        "GEMINI_API_KEY": "YOUR_GEMINI_API_KEY"
       }
     }
   }
@@ -197,10 +214,12 @@ docker pull isokoliuk/mcp-searxng:latest
       "args": [
         "run", "-i", "--rm",
         "-e", "SEARXNG_URL",
+        "-e", "GEMINI_API_KEY",
         "isokoliuk/mcp-searxng:latest"
       ],
       "env": {
-        "SEARXNG_URL": "YOUR_SEARXNG_INSTANCE_URL"
+        "SEARXNG_URL": "YOUR_SEARXNG_INSTANCE_URL",
+        "GEMINI_API_KEY": "YOUR_GEMINI_API_KEY"
       }
     }
   }
@@ -229,6 +248,9 @@ docker pull isokoliuk/mcp-searxng:latest
         "-e", "HTTP_PROXY",
         "-e", "HTTPS_PROXY",
         "-e", "NO_PROXY",
+        "-e", "SYNTHESIZE_PROVIDER",
+        "-e", "GEMINI_API_KEY",
+        "-e", "MIMO_API_KEY",
         "isokoliuk/mcp-searxng:latest"
       ],
       "env": {
@@ -241,7 +263,9 @@ docker pull isokoliuk/mcp-searxng:latest
         "URL_READER_HTTP_PROXY": "http://reader-proxy.company.com:8080",
         "HTTP_PROXY": "http://global-proxy.company.com:8080",
         "HTTPS_PROXY": "http://global-proxy.company.com:8080",
-        "NO_PROXY": "localhost,127.0.0.1,.local,.internal"
+        "NO_PROXY": "localhost,127.0.0.1,.local,.internal",
+        "SYNTHESIZE_PROVIDER": "gemini",
+        "GEMINI_API_KEY": "YOUR_GEMINI_API_KEY"
       }
     }
   }
@@ -281,6 +305,9 @@ services:
       # - HTTP_PROXY=http://global-proxy.company.com:8080
       # - HTTPS_PROXY=http://proxy.company.com:8080
       # - NO_PROXY=localhost,127.0.0.1,.local,.internal
+      # - SYNTHESIZE_PROVIDER=gemini
+      # - GEMINI_API_KEY=YOUR_GEMINI_API_KEY
+      # - MIMO_API_KEY=YOUR_MIMO_API_KEY
 ```
 
 Then configure your MCP client:
