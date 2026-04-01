@@ -35,6 +35,7 @@
         "node": ">=20"
     },
     "scripts": {
+        "prepare": "npm run build",
         "build": "tsc && shx chmod +x dist/*.js",
         "watch": "tsc --watch",
         "test": "cross-env SEARXNG_URL=https://test-searx.example.com tsx __tests__/run-all.ts",
